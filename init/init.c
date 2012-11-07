@@ -729,6 +729,7 @@ static void process_kernel_cmdline(void)
     /* don't expose the raw commandline to nonpriv processes */
     chmod("/proc/cmdline", 0440);
 
+memset(kernel_bootmode, '\0', sizeof( kernel_bootmode ));
     /* first pass does the common stuff, and finds if we are in qemu.
      * second pass is only necessary for qemu to export all kernel params
      * as props.
@@ -972,7 +973,6 @@ int main(int argc, char **argv)
 
     INFO("reading config file\n");
 
-memset(kernel_bootmode, '\0', sizeof( kernel_bootmode ));
 /* Tutajjjjjjjjjjjjjjjjjjjjjjjjjjjj */
 if (!charging_mode_booting()) {
 init_parse_config_file("/init.rc");
@@ -995,6 +995,7 @@ init_parse_config_file(tmp);
     if (access("/init.target.rc", R_OK) == 0) {
         INFO("Reading target specific config file");
             init_parse_config_file("/init.target.rc");
+    }
     } else
 init_parse_config_file("/lpm.rc");
 
