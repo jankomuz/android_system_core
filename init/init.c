@@ -973,8 +973,7 @@ int main(int argc, char **argv)
     INFO("reading config file\n");
 
 memset(kernel_bootmode, '\0', sizeof( kernel_bootmode ));
-
-// Tutajjjjjjjjjjjjjjjjjjjjjjjjjjjj
+/* Tutajjjjjjjjjjjjjjjjjjjjjjjjjjjj */
 if (!charging_mode_booting()) {
 init_parse_config_file("/init.rc");
 
