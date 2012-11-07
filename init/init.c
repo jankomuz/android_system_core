@@ -79,6 +79,7 @@ static char bootmode[32];
 static char hardware[32];
 static unsigned revision = 0;
 static char qemu[32];
+static char kernel_bootmode[32];
 static char battchg_pause[32];
 
 #ifdef HAVE_SELINUX
@@ -658,6 +659,9 @@ static void import_kernel_nv(char *name, int for_emulator)
         if (!strcmp(value,"true")) {
             emmc_boot = 1;
         }
+/* Samsung Bootloader recovery cmdline */
+} else if (!strcmp(name,"bootmode")) {
+strncpy(kernel_bootmode, value, sizeof(kernel_bootmode));
     } else if (!strcmp(name,BOARD_CHARGING_CMDLINE_NAME)) {
         strlcpy(battchg_pause, value, sizeof(battchg_pause));
     } else if (!strncmp(name, "androidboot.", 12) && name_len > 12) {
@@ -968,10 +972,19 @@ int main(int argc, char **argv)
 
     INFO("reading config file\n");
 
-    if (!charging_mode_booting())
-       init_parse_config_file("/init.rc");
-    else
-       init_parse_config_file("/lpm.rc");
+memset(kernel_bootmode, '\0', sizeof( kernel_bootmode ));
+
+// Tutajjjjjjjjjjjjjjjjjjjjjjjjjjjj
+if (!charging_mode_booting()) {
+init_parse_config_file("/init.rc");
+
+if (!strcmp(kernel_bootmode, "2") || !strcmp(kernel_bootmode, "4"))
+init_parse_config_file("/recovery.rc");
+else {
+get_hardware_name(hardware, &revision);
+snprintf(tmp, sizeof(tmp), "/init.%s.rc", hardware);
+init_parse_config_file(tmp);
+}
 
     /* Check for an emmc initialisation file and read if present */
     if (emmc_boot && access("/init.emmc.rc", R_OK) == 0) {
@@ -983,7 +996,8 @@ int main(int argc, char **argv)
     if (access("/init.target.rc", R_OK) == 0) {
         INFO("Reading target specific config file");
             init_parse_config_file("/init.target.rc");
-    }
+    } else
+init_parse_config_file("/lpm.rc");
 
     action_for_each_trigger("early-init", action_add_queue_tail);
 
